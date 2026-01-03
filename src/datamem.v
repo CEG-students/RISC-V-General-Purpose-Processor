@@ -32,11 +32,10 @@ module datamem (
 
                 // SH
                 3'b001: begin
-                    if (!byte_sel[0]) begin
-                        ram[word_addr][15:0]  <= data_in[15:0];
-                    end else begin
-                        ram[word_addr][31:16] <= data_in[15:0];
-                    end
+					case (byte_sel[0])
+						1'b0: ram[word_addr][15:0]  <= data_in[15:0];
+                        1'b1: ram[word_addr][31:16] <= data_in[15:0];
+					endcase
                 end
 
                 // SW
@@ -50,9 +49,9 @@ module datamem (
 
     // ---------------- READ (ASYNC) ----------------
     always @(*) begin
-		
+		data_out=32'b00000000;
 
-		if (!write_en && !address[31:12]) begin
+		if (!address[31:12]) begin
 			case (func3)
 
 				// LB (8-Bit Signed Read)
@@ -92,7 +91,7 @@ module datamem (
 						1'b0: data_out = {16'b0, word[15:0]};
 						1'b1: data_out = {16'b0, word[31:16]};
 					endcase
-						end
+				end
 
 			endcase
 		end
