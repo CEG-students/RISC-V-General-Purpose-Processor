@@ -1,9 +1,9 @@
 module datamem (
-    input  wire        clk,
-    input  wire [31:0] address,
-    input  wire        write_en,
-    input  wire [2:0]  func3,
-    input  wire [31:0] data_in,
+    input  clk,
+    input  [31:0] address,
+    input  write_en,
+    input  [2:0]  func3,
+    input  [31:0] data_in,
     output reg  [31:0] data_out
 );
 
@@ -13,7 +13,7 @@ module datamem (
     wire [9:0] word_addr = address[11:2];   // word index
     wire [1:0] byte_sel  = address[1:0];    // byte select
 
-    wire [31:0] word = ram[word_addr];      // ASYNC READ (key point)
+    wire [31:0] word = ram[word_addr];     
 
     // ---------------- WRITE (sync) ----------------
     always @(posedge clk) begin
@@ -55,7 +55,7 @@ module datamem (
 		if (!write_en && !address[31:12]) begin
 			case (func3)
 
-				// LB
+				// LB (8-Bit Signed Read)
 				3'b000: begin
 					case (byte_sel)
 						2'b00: data_out = {{24{word[7]}},   word[7:0]};
@@ -65,7 +65,7 @@ module datamem (
 					endcase
 				end
 
-				// LH
+				// LH (16-Bit Signed Read)
 				3'b001: begin
 					case (byte_sel[0])
 						1'b0: data_out = {{16{word[15]}}, word[15:0]};
@@ -73,10 +73,10 @@ module datamem (
 					endcase
 				end
 
-				// LW
+				// LW(32 Bit Read)
 				3'b010: data_out = word;
 
-				// LBU
+				// LBU (8-Bit Unsigned Read )
 				3'b100: begin
 					case (byte_sel)
 						2'b00: data_out = {24'b0, word[7:0]};
@@ -86,7 +86,7 @@ module datamem (
 					endcase
 				end
 
-				// LHU 
+				// LHU (16-Bit Unsigned Read)
 				3'b101: begin
 					case (byte_sel[0])
 						1'b0: data_out = {16'b0, word[15:0]};
