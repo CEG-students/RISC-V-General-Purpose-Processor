@@ -38,4 +38,9 @@ always@(*) begin
       default : result_reg = 32'bx;
     endcase
 endcase    
+
 end
+assign zero = (ALU_result == 32'b0) ? 1'b1 : 1'b0;
+assign ALU_result = result_reg;
+
+endmodule
