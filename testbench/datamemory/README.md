@@ -43,6 +43,7 @@ The objective of this testbench is to verify:
 The waveform below demonstrates correct memory behavior for different load and store
 operations, including byte, halfword, and word accesses.
 
+<img width="1831" height="244" alt="image" src="https://github.com/user-attachments/assets/e1e6689c-7a9a-4f59-b4ef-5276f2da56fa" />
 
 
 ---
@@ -52,10 +53,4 @@ operations, including byte, halfword, and word accesses.
 The simulation transcript confirms successful execution of the testbench with expected
 data values observed during memory read and write operations.
 
-
-
----
-
-
-iverilog -o tb tb_datamem.v datamem.v
-vvp tb
+<img width="844" height="243" alt="image" src="https://github.com/user-attachments/assets/120276a7-acf2-456e-a204-2b5c0e162c6b" />
