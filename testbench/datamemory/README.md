@@ -54,3 +54,10 @@ The simulation transcript confirms successful execution of the testbench with ex
 data values observed during memory read and write operations.
 
 <img width="844" height="243" alt="image" src="https://github.com/user-attachments/assets/120276a7-acf2-456e-a204-2b5c0e162c6b" />
+
+---
+
+### RTL VIEW 
+<img width="1881" height="913" alt="Screenshot 2025-12-31 195125" src="https://github.com/user-attachments/assets/30be3609-42f8-4d2a-8e8c-2212092747a7" />
+<img width="1536" height="826" alt="Screenshot 2025-12-31 195143" src="https://github.com/user-attachments/assets/17bcc399-0400-40bf-ab69-1ad4db31c62a" />
+
