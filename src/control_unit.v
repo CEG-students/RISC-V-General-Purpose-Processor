@@ -1,4 +1,10 @@
-module control_unit(opcode,funct3,funct7,zero,Pc_src,Result_src,mem_write,reg_write,ALU_control,ALU_src,imm_select,branch,JAL,JALR,loadwidth,loadunsigned);
+module control_unit(
+    opcode, funct3, funct7, zero,
+    Pc_src, Result_src, mem_write, reg_write,
+    ALU_control, ALU_src, imm_select,
+    branch, JAL, JALR,
+    loadwidth, loadunsigned
+);
 
 input [6:0] opcode;
 input [2:0] funct3;
@@ -18,7 +24,7 @@ output reg JALR;
 output reg [1:0] loadwidth;
 output reg loadunsigned;
 
-//opcodes
+// ---------------- OPCODES ----------------
 localparam OP_RTYPE  = 7'b0110011;
 localparam OP_ITYPE  = 7'b0010011;
 localparam OP_LOAD   = 7'b0000011;
@@ -29,8 +35,7 @@ localparam OP_BRANCH = 7'b1100011;
 localparam OP_JAL    = 7'b1101111;
 localparam OP_JALR   = 7'b1100111;
 
-//ALU ENCODING
-
+// ---------------- ALU CONTROL ----------------
 localparam ALU_ADD  = 4'b0000;
 localparam ALU_SUB  = 4'b0001;
 localparam ALU_SLL  = 4'b0010;
@@ -43,158 +48,127 @@ localparam ALU_OR   = 4'b1000;
 localparam ALU_AND  = 4'b1001;
 localparam ALU_PASS = 4'b1010;
 
-
-
 always @(*) begin
-    //default values
-    Pc_src       = 0;
+    // -------- DEFAULTS --------
+    Pc_src       = 2'b00;
     Result_src   = 2'b00;
-    mem_write    = 0;
-    reg_write    = 0;
+    mem_write    = 1'b0;
+    reg_write    = 1'b0;
     ALU_control  = ALU_ADD;
-    ALU_src      = 0;
+    ALU_src      = 1'b0;
     imm_select   = 3'b000;
-    branch       = 0;
-    JAL          = 0;
-    JALR         = 0;
+    branch       = 1'b0;
+    JAL          = 1'b0;
+    JALR         = 1'b0;
     loadwidth    = 2'b10;
-    loadunsigned = 0;    
+    loadunsigned = 1'b0;
 
-case(opcode)
-     OP_RTYPE: begin
-        reg_write = 1;
+    case (opcode)
 
+    // -------- R-TYPE --------
+    OP_RTYPE: begin
+        reg_write = 1'b1;
         case (funct3)
-            3'b000: begin
-                 if (funct7 == 7'b0000000)
-                        ALU_control = ALU_ADD;
-                  else if (funct7 == 7'b0100000)
-                        ALU_control = ALU_SUB;
-            end
+            3'b000: ALU_control = (funct7 == 7'b0100000) ? ALU_SUB : ALU_ADD;
             3'b001: ALU_control = ALU_SLL;
             3'b010: ALU_control = ALU_SLT;
             3'b011: ALU_control = ALU_SLTU;
             3'b100: ALU_control = ALU_XOR;
-            3'b101:begin
-                 if (funct7 == 7'b0000000)
-                        ALU_control = ALU_SRL;
-                  else if (funct7 == 7'b0100000)
-                        ALU_control = ALU_SRA;
-            end
+            3'b101: ALU_control = (funct7 == 7'b0100000) ? ALU_SRA : ALU_SRL;
             3'b110: ALU_control = ALU_OR;
             3'b111: ALU_control = ALU_AND;
         endcase
-     end
-     OP_ITYPE: begin
-        reg_write = 1;
-        ALU_src   = 1;
-        imm_select = 3'b000;
+    end
+
+    // -------- I-TYPE --------
+    OP_ITYPE: begin
+        reg_write  = 1'b1;
+        ALU_src    = 1'b1;
         case (funct3)
             3'b000: ALU_control = ALU_ADD;
             3'b001: ALU_control = ALU_SLL;
             3'b010: ALU_control = ALU_SLT;
             3'b011: ALU_control = ALU_SLTU;
             3'b100: ALU_control = ALU_XOR;
+            3'b101: ALU_control = (funct7 == 7'b0100000) ? ALU_SRA : ALU_SRL;
             3'b110: ALU_control = ALU_OR;
             3'b111: ALU_control = ALU_AND;
-            3'b101: begin
-                if (funct7 == 7'b0000000)
-                    ALU_control = ALU_SRL;
-                else if (funct7 == 7'b0100000)
-                    ALU_control = ALU_SRA;
-            end
-            default: ALU_control = ALU_ADD;
         endcase
-     end
+    end
 
-     OP_LOAD: begin
-        reg_write    =1'b1;
-        ALU_src      =1'b1;
-        imm_select   =3'b000;
-        Result_src   =2'b01;
+    // -------- LOAD --------
+    OP_LOAD: begin
+        reg_write  = 1'b1;
+        ALU_src    = 1'b1;
+        Result_src = 2'b01;
+
         case (funct3)
-            3'b000: begin
-                loadwidth    = 2'b00; //LB
-                loadunsigned = 0;
-            end
-             3'b001: begin
-                loadwidth    = 2'b01; //LH
-                loadunsigned = 0;
-            end
-             3'b010: begin
-                loadwidth    = 2'b10; //LW
-                loadunsigned = 0;
-            end
-             3'b100: begin
-                loadwidth    = 2'b00; //LB
-                loadunsigned = 1;
-            end
-             3'b101: begin
-                loadwidth    = 2'b01; //LH
-                loadunsigned = 1;
-            end
-                default: begin
-                    loadwidth    = 2'b10; //LW
-                    loadunsigned = 0;
-                end
+            3'b000: begin loadwidth = 2'b00; loadunsigned = 0; end // LB
+            3'b001: begin loadwidth = 2'b01; loadunsigned = 0; end // LH
+            3'b010: begin loadwidth = 2'b10; loadunsigned = 0; end // LW
+            3'b100: begin loadwidth = 2'b00; loadunsigned = 1; end // LBU
+            3'b101: begin loadwidth = 2'b01; loadunsigned = 1; end // LHU
         endcase
-     end
+    end
 
-        OP_STORE: begin
-            mem_write  = 1'b1;
-            ALU_src    = 1'b1;
-            imm_select = 3'b001;
+    // -------- STORE --------
+    OP_STORE: begin
+        mem_write  = 1'b1;
+        ALU_src    = 1'b1;
+        imm_select = 3'b001;
+        case (funct3)
+            3'b000: loadwidth = 2'b00;
+            3'b001: loadwidth = 2'b01;
+            3'b010: loadwidth = 2'b10;
+        endcase
+    end
 
-            case (funct3)
-                3'b000: loadwidth = 2'b00;
-                3'b001: loadwidth = 2'b01;
-                3'b010: loadwidth = 2'b10;
-                default: loadwidth = 2'b10;
-            endcase
-        end
+    // -------- LUI --------
+    OP_LUI: begin
+        reg_write   = 1'b1;
+        ALU_control = ALU_PASS;
+        Result_src  = 2'b11;
+        imm_select  = 3'b011;
+    end
 
-        OP_LUI: begin
-            reg_write  = 1'b1;
-            ALU_src    = 1'b1;
-            imm_select = 3'b011;
-            ALU_control = ALU_PASS;
-            Result_src = 2'b11;
-        end
+    // -------- AUIPC --------
+    OP_AUIPC: begin
+        reg_write   = 1'b1;
+        ALU_control = ALU_ADD;
+        Result_src  = 2'b11;
+        imm_select  = 3'b011;
+    end
 
-        OP_AUIPC: begin
-            reg_write   = 1'b1;
-            ALU_src     = 1'b1;
-            imm_select  = 3'b011;
-            ALU_control = ALU_ADD;
-            Result_src  = 2'b11;
-        end
+    // -------- BRANCH --------
+    OP_BRANCH: begin
+        imm_select  = 3'b010;
+        ALU_control = ALU_SUB;
 
-        OP_BRANCH: begin
-            branch      = 1'b1;
-            imm_select  = 3'b010;
-            ALU_control = ALU_SUB;
-            ALU_src     = 1'b0;
-            Pc_src      = 1'b0;
-        end
+        case (funct3)
+            3'b000: if (zero)  Pc_src = 2'b01; // BEQ
+            3'b001: if (!zero) Pc_src = 2'b01; // BNE
+        endcase
+    end
 
-        OP_JAL: begin
-            reg_write  = 1'b1;
-            JAL        = 1'b1;
-            Pc_src     = 2'b10;
-            imm_select = 3'b100;
-            Result_src = 2'b10;
-        end
+    // -------- JAL --------
+    OP_JAL: begin
+        reg_write  = 1'b1;
+        JAL        = 1'b1;
+        Pc_src     = 2'b10;
+        Result_src = 2'b10;
+        imm_select = 3'b100;
+    end
 
-        OP_JALR: begin
-            reg_write  = 1'b1;
-            JALR       = 1'b1;
-            Pc_src     = 2'b10;
-            ALU_src    = 1'b1;
-            imm_select = 3'b000;
-            Result_src = 2'b10;
-        end
-          default: begin
-            // Unknown opcode: keep defaults (no writes)
-        end
-endcase
+    // -------- JALR --------
+    OP_JALR: begin
+        reg_write  = 1'b1;
+        JALR       = 1'b1;
+        Pc_src     = 2'b10;
+        ALU_src    = 1'b1;
+        Result_src = 2'b10;
+    end
+
+    endcase
 end
+
+endmodule
