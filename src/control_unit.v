@@ -24,7 +24,6 @@ output reg JALR;
 output reg [1:0] loadwidth;
 output reg loadunsigned;
 
-// ---------------- OPCODES ----------------
 localparam OP_RTYPE  = 7'b0110011;
 localparam OP_ITYPE  = 7'b0010011;
 localparam OP_LOAD   = 7'b0000011;
